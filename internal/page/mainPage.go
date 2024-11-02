@@ -12,7 +12,9 @@ type MainPage struct {
 }
 
 func NewMainPage(state *state.AppState) *MainPage {
-	return &MainPage{}
+	return &MainPage{
+		state: state,
+	}
 }
 
 func (p *MainPage) Layout(gtx layout.Context) layout.Dimensions {
