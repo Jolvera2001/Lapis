@@ -16,9 +16,10 @@ type App struct {
 func NewApp() *App {
 	state := &state.AppState{
 		CurrentPage: state.MainPageID,
-		DarkMode:    false,
+		DarkMode:    true,
 		Theme:       material.NewTheme(),
 	}
+	state.UpdateTheme()
 
 	return &App{
 		state: state,
