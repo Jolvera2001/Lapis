@@ -35,3 +35,29 @@ func (k *Kernel) Register(p i.Plugin) error {
 	k.plugins[id] = p
 	return nil
 }
+
+func (k *Kernel) Start() error {
+	k.mu.Lock()
+	defer k.mu.Unlock()
+
+	if k.started {
+		return errors.New("kernel already started")
+	}
+
+	// init plugins
+	for id, p := range k.plugins {
+		if err := p.Initialize(); err != nil {
+			return fmt.Errorf("failed to initialize plugin %s: %w", id, err)
+		}
+	}
+
+	// start plugins
+	for id, p := range k.plugins {
+		if err := p.Start(); err != nil {
+			return fmt.Errorf("failed to start plugin %s: %w", id, err)
+		}
+	}
+
+	k.started = true
+	return nil
+}

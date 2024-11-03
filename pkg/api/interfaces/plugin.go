@@ -5,4 +5,5 @@ type Plugin interface {
 	Initialize() error
 	Start() error
 	Stop() error
+	Dependencies() []string
 }
