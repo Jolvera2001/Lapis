@@ -42,8 +42,19 @@ we have to consider when making our API:
 
 These questions don't have a simple answer within microkernel software systems.
 It seems like each microkernel system has their own unique set of problems and
-there is no "one size fits all" solution. We cannot treat this like a simple problem 
+there is no "one size fits all" solution. We cannot treat this like a simple problem
 so this needs much more thinking than I thought.
+
+### API Considerations
+
+So far the main considerations based off of our plugin interface is:
+
+- UI
+  - Plugins should be able to declare their ui and be able to add it into the main application window. Our GUI is Gio
+- Event System
+  - Plugins should be able to emit events and subscribe to other events. The Core will handle how this is done
+- Resource Management
+  - Plugins should also be able to do things like save to a database, delcare preferences and save them, etc.
 
 ## Plug-in Interface
 
