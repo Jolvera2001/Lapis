@@ -56,6 +56,19 @@ So far the main considerations based off of our plugin interface is:
 - Resource Management
   - Plugins should also be able to do things like save to a database, delcare preferences and save them, etc.
 
+### UI
+
+### Event System
+
+Events will be incredibly important since plugins will depend on other events for invoking some sort of internal method in the plugins. A concept could look like
+
+```
+api.Emit("Event Name", someMethodCausingEmition)
+api.Subscribe("Event Name", someMethodBeingInvoked)
+```
+
+### Resource Management
+
 ## Plug-in Interface
 
 Right now we are considering:
