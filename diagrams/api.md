@@ -62,7 +62,7 @@ So far the main considerations based off of our plugin interface is:
 
 Events will be incredibly important since plugins will depend on other events for invoking some sort of internal method in the plugins. A concept could look like
 
-```
+```go
 api.Emit("Event Name", someMethodCausingEmition)
 api.Subscribe("Event Name", someMethodBeingInvoked)
 ```
