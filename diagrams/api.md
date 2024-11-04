@@ -11,4 +11,4 @@ If plug-ins can be able to list dependencies, the core will be able to work out 
 
 will be able to properly work because they will already exist
 
-For example, if A emits eventA, and b emits EventB and depends on EventA, A should load in first before B. B had a dependency on A ( []string { "A" } assuming A is the id 
+For example, if A emits EventA, and b emits EventB and depends on EventA, A should load in first before B. B has a dependency on A ( []string { "A" } assuming A is the id 
