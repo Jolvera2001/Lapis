@@ -8,17 +8,40 @@ import (
 )
 
 type Kernel struct {
+	handlers map[string][]EventHandler
 	plugins map[string]i.Plugin
 	mu      sync.Mutex
 	started bool
-	api API
 }
 
-func NewKernel(api API) *Kernel {
+func NewKernel() *Kernel {
 	return &Kernel{
 		plugins: make(map[string]i.Plugin),
-		api: api,
 	}
+}
+
+func (k *Kernel) Emit(event Event) error {
+	k.mu.Lock()
+	handlers := k.handlers[event.Name]
+	k.mu.Unlock()
+
+	for _, handler := range handlers {
+		if err := handler(event); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (k *Kernel) Subscribe(eventName string, handler EventHandler) {
+	k.mu.Lock()
+	defer k.mu.Unlock()
+
+	if k.handlers[eventName] == nil {
+		k.handlers[eventName] = make([]EventHandler, 0)
+	}
+
+	k.handlers[eventName] = append(k.handlers[eventName], handler)
 }
 
 func (k *Kernel) Register(p i.Plugin) error {
@@ -38,17 +61,12 @@ func (k *Kernel) Register(p i.Plugin) error {
 	return nil
 }
 
-func (k *Kernel) Start() error {
+func (k *Kernel) Initialize() error {
 	k.mu.Lock()
 	defer k.mu.Unlock()
 
 	if k.started {
 		return errors.New("kernel already started")
-	}
-
-	// init api
-	if err := k.api.Initialize(); err != nil {
-		return err
 	}
 
 	// init plugins
@@ -69,7 +87,7 @@ func (k *Kernel) Start() error {
 	return nil
 }
 
-func (k *Kernel) Stop() error {
+func (k *Kernel) Shutdown() error {
 	k.mu.Lock()
 	defer k.mu.Unlock()
 
@@ -82,11 +100,6 @@ func (k *Kernel) Stop() error {
 		if err := p.Stop(); err != nil {
 			return err
 		}
-	}
-
-	// stop api
-	if err := k.api.Shutdown(); err != nil {
-		return err
 	}
 
 	return nil
