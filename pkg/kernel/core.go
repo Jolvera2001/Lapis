@@ -11,11 +11,13 @@ type Kernel struct {
 	plugins map[string]i.Plugin
 	mu      sync.Mutex
 	started bool
+	api API
 }
 
-func NewKernel() *Kernel {
+func NewKernel(api API) *Kernel {
 	return &Kernel{
 		plugins: make(map[string]i.Plugin),
+		api: api,
 	}
 }
 
@@ -44,6 +46,11 @@ func (k *Kernel) Start() error {
 		return errors.New("kernel already started")
 	}
 
+	// init api
+	if err := k.api.Initialize(); err != nil {
+		return err
+	}
+
 	// init plugins
 	for id, p := range k.plugins {
 		if err := p.Initialize(); err != nil {
@@ -59,5 +66,28 @@ func (k *Kernel) Start() error {
 	}
 
 	k.started = true
+	return nil
+}
+
+func (k *Kernel) Stop() error {
+	k.mu.Lock()
+	defer k.mu.Unlock()
+
+	if !k.started {
+		return errors.New("Kernel not started")
+	}
+
+	// stop plugins
+	for _, p := range k.plugins {
+		if err := p.Stop(); err != nil {
+			return err
+		}
+	}
+
+	// stop api
+	if err := k.api.Shutdown(); err != nil {
+		return err
+	}
+
 	return nil
 }
