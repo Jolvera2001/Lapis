@@ -45,6 +45,19 @@ func (k *Kernel) Subscribe(eventName string, handler EventHandler) {
 	k.handlers[eventName] = append(k.handlers[eventName], handler)
 }
 
+func (k *Kernel) AddUIPlug(pluginId string, uiPlug UIPlug) error {
+	k.mu.Lock()
+	defer k.mu.Unlock()
+
+	if k.uiPlugs[pluginId] == nil {
+		k.uiPlugs[pluginId] = make([]UIPlug, 0)
+	}
+
+	k.uiPlugs[pluginId] = append(k.uiPlugs[pluginId], uiPlug)
+
+	return nil
+}
+
 func (k *Kernel) Register(p Plugin) error {
 	k.mu.Lock()
 	defer k.mu.Unlock()
