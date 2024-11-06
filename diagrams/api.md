@@ -9,7 +9,12 @@ there
 
 - Index
   - [Core API](#core-api)
+    - [API Considerations](#api-considerations)
+    - [Lifecycle](#lifecycle)
+    - [UI](#ui)
+    - [Event System](#event-system)
   - [Plug-in Interface](#plug-in-interface)
+  - [Future Enhancement](#future-enhancements)
 
 ## TL;DR
 
@@ -117,6 +122,17 @@ api.Emit("Event Name", someMethodCausingEmition)
 api.Subscribe("Event Name", someMethodBeingInvoked)
 ```
 
+We can use this sort of setup:
+```go
+// string -> Event Name
+// EventHandler -> function to be invoked 
+map[string][]EventHandler
+```
+
+Our Kernel can simply search for the event that was emitted within our hashmap, and then invoke all events that are within that key:
+
+- ex: { "someEvent": [plugin.somefunction, plugin2.anotherfunction] }
+
 ### Resource Management
 
 ## Plug-in Interface
@@ -187,3 +203,16 @@ This one is a bit iffy and could change over development. The idea for this is f
   - After initialization, we can then simply start the plugin service
 - Stop()
   - When the plugin is running, we can stop it whenever and we wouldn't need to restart since we've already initialized it. So we can just Start and Stop whenever
+
+## Future Enhancements
+
+There are some things we still need to keep in mind when moving forward. We could be nearing the point of a complete API for now and it would need improvements
+
+### Event Async Invoking
+
+Our event system so far just calls the Kernel to invoke a handler within a map. It can be fine until, let's say 5 plugins subscribed to the same event. Race conditions can happen, especially if there are things related to a local db. Some considerations are:
+
+- Using Channels as an event bus
+  - we can implement a Pub/Sub system much like how we already have it, and just let these handlers use a channel as a queue
+- Priority queue
+  - This is another idea where some events should invoke before others. Although it might not be necessary
