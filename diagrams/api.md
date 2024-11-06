@@ -56,7 +56,57 @@ So far the main considerations based off of our plugin interface is:
 - Resource Management
   - Plugins should also be able to do things like save to a database, delcare preferences and save them, etc.
 
+### Lifecycle
+
+```mermaid
+---
+title: Lifecycle Flowchart
+---
+flowchart LR
+  k[kernel]
+  app
+  a[API]
+  p1[plugin1]
+  p2[plugin2]
+
+  subgraph Initialize
+  k -->|then starts|app 
+  end
+
+  subgraph Process
+  p1 -->|"init() uses"|a
+  p2 -->|"init() uses"|a
+  end
+
+  Initialize -->|Starts|Process
+  a -->|Exposes|k
+
+```
+
 ### UI
+
+We can leverage Gio's concepts to our advantage and copy how we've handled the event system:
+
+```go
+// api def
+api.AddUIPlug(widget layout.Widget)
+
+// kernel 
+map[string][]UIPlug // string -> Plugin Id
+
+// UIPlug
+type UIPlug struct {
+  UI          layout.Widget
+  Destination string
+}
+```
+
+Because layout.Widget is a function, we can just store the functions within the kernel associated with a Plugin Id, and be able to determine with the UIPlug:
+
+- What to run (returning the widget)
+  - The kernel will just run that function that is stored
+- Where is should be (sidebar, main area, toolbar, etc.)
+  - The Kernel can just determine where this needs to go based off of destination
 
 ### Event System
 
