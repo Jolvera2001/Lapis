@@ -7,6 +7,7 @@ import (
 )
 
 type Kernel struct {
+	uiPlugs  map[string][]UIPlug
 	handlers map[string][]EventHandler
 	plugins  map[string]Plugin
 	mu       sync.Mutex
@@ -16,7 +17,7 @@ type Kernel struct {
 func NewKernel() *Kernel {
 	return &Kernel{
 		handlers: make(map[string][]EventHandler),
-		plugins: make(map[string]Plugin),
+		plugins:  make(map[string]Plugin),
 	}
 }
 
