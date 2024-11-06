@@ -10,8 +10,8 @@ type Event struct {
 	Name      string
 	Data      interface{}
 	Timestamp time.Time
-	Context context.Context
-	Metadata map[string]interface{}
+	Context   context.Context
+	Metadata  map[string]interface{}
 }
 
 type EventHandler func(Event) error

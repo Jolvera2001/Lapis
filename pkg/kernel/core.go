@@ -9,9 +9,9 @@ import (
 
 type Kernel struct {
 	handlers map[string][]EventHandler
-	plugins map[string]i.Plugin
-	mu      sync.Mutex
-	started bool
+	plugins  map[string]i.Plugin
+	mu       sync.Mutex
+	started  bool
 }
 
 func NewKernel() *Kernel {
@@ -69,10 +69,16 @@ func (k *Kernel) Initialize() error {
 		return errors.New("kernel already started")
 	}
 
+	// sort plugins
+	sorted, err := k.sortPluginByDependencies()
+	if err != nil {
+		return fmt.Errorf("error with sorting dependencies: %s", err)
+	}
+
 	// init plugins
-	for id, p := range k.plugins {
+	for id, p := range sorted {
 		if err := p.Initialize(); err != nil {
-			return fmt.Errorf("failed to initialize plugin %s: %w", id, err)
+			return fmt.Errorf("failed to initialize plugin %d: %w", id, err)
 		}
 	}
 
@@ -103,4 +109,77 @@ func (k *Kernel) Shutdown() error {
 	}
 
 	return nil
+}
+
+func (k *Kernel) sortPluginByDependencies() ([]i.Plugin, error) {
+	// building graph
+	graph := make(map[string][]string)
+	pluginMap := make(map[string]i.Plugin)
+
+	// building graph map
+	for _, p := range k.plugins {
+		graph[p.ID()] = p.Dependencies()
+		pluginMap[p.ID()] = p
+	}
+
+	// track visited and temp for cycles
+	visited := make(map[string]bool)
+	temp := make(map[string]bool)
+
+	// result
+	var sorted []string
+
+	// dfs
+	var visit func(id string) error
+	visit = func(id string) error {
+		// check for cycle
+		if temp[id] {
+			return fmt.Errorf("cycle detected in plugin dependencies involving %s", id)
+		}
+
+		// skip if already visited
+		if visited[id] {
+			return nil
+		}
+
+		// mark temp
+		temp[id] = true
+
+		// visit dependencies
+		for _, dep := range graph[id] {
+			if _, exists := graph[dep]; !exists {
+				return fmt.Errorf("plugin %s depends on non-existent plugin %s", id, dep)
+			}
+
+			if err := visit(dep); err != nil {
+				return err
+			}
+		}
+
+		// remove temp mark
+		temp[id] = false
+		//mark as visited
+		visited[id] = true
+		// add to sorted list
+		sorted = append(sorted, id)
+
+		return nil
+	}
+
+	// visit all plugins
+	for id := range graph {
+		if !visited[id] {
+			if err := visit(id); err != nil {
+				return nil, err
+			}
+		}
+	}
+
+	// convert sorted names back to array
+	result := make([]i.Plugin, len(sorted))
+	for i, id := range sorted {
+		result[i] = pluginMap[id]
+	}
+
+	return result, nil
 }
