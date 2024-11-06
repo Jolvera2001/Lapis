@@ -3,20 +3,20 @@ package kernel
 import (
 	"errors"
 	"fmt"
-	i "lapis-project/pkg/api/interfaces"
 	"sync"
 )
 
 type Kernel struct {
 	handlers map[string][]EventHandler
-	plugins  map[string]i.Plugin
+	plugins  map[string]Plugin
 	mu       sync.Mutex
 	started  bool
 }
 
 func NewKernel() *Kernel {
 	return &Kernel{
-		plugins: make(map[string]i.Plugin),
+		handlers: make(map[string][]EventHandler),
+		plugins: make(map[string]Plugin),
 	}
 }
 
@@ -44,7 +44,7 @@ func (k *Kernel) Subscribe(eventName string, handler EventHandler) {
 	k.handlers[eventName] = append(k.handlers[eventName], handler)
 }
 
-func (k *Kernel) Register(p i.Plugin) error {
+func (k *Kernel) Register(p Plugin) error {
 	k.mu.Lock()
 	defer k.mu.Unlock()
 
@@ -77,7 +77,7 @@ func (k *Kernel) Initialize() error {
 
 	// init plugins
 	for id, p := range sorted {
-		if err := p.Initialize(); err != nil {
+		if err := p.Initialize(k); err != nil {
 			return fmt.Errorf("failed to initialize plugin %d: %w", id, err)
 		}
 	}
@@ -111,10 +111,10 @@ func (k *Kernel) Shutdown() error {
 	return nil
 }
 
-func (k *Kernel) sortPluginByDependencies() ([]i.Plugin, error) {
+func (k *Kernel) sortPluginByDependencies() ([]Plugin, error) {
 	// building graph
 	graph := make(map[string][]string)
-	pluginMap := make(map[string]i.Plugin)
+	pluginMap := make(map[string]Plugin)
 
 	// building graph map
 	for _, p := range k.plugins {
@@ -176,7 +176,7 @@ func (k *Kernel) sortPluginByDependencies() ([]i.Plugin, error) {
 	}
 
 	// convert sorted names back to array
-	result := make([]i.Plugin, len(sorted))
+	result := make([]Plugin, len(sorted))
 	for i, id := range sorted {
 		result[i] = pluginMap[id]
 	}
