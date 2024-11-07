@@ -3,10 +3,22 @@ package kernel
 import (
 	"fmt"
 	"sync"
+
+	"gioui.org/layout"
 )
+
+type ZoneConfig struct {
+	Direction  layout.Direction
+	MaxWidgets int
+	Dimensions layout.Dimensions
+	Priority   int
+	Spacing    int
+	Padding    int
+}
 
 type LayoutManager struct {
 	zones             map[string][]UIPlug
+	zoneConfigs       map[string]ZoneConfig
 	validDestinations map[string]bool
 	mu                sync.Mutex
 }
@@ -16,8 +28,8 @@ func NewLayoutManager() *LayoutManager {
 		zones: make(map[string][]UIPlug),
 		validDestinations: map[string]bool{
 			"left-sidebar": true,
-			"main-area": true,
-			"header": true,
+			"main-area":    true,
+			"header":       true,
 		},
 	}
 }
