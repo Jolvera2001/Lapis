@@ -45,3 +45,4 @@ func (l *LayoutManager) AddWidget(plug UIPlug) error {
 	l.zones[plug.Destination] = append(l.zones[plug.Destination], plug)
 	return nil
 }
+
