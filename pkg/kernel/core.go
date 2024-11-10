@@ -58,6 +58,13 @@ func (k *Kernel) AddUIPlug(pluginId string, uiPlug UIPlug) error {
 	return nil
 }
 
+func (k *Kernel) GetPlugin(id string) Plugin {
+	k.mu.Lock()
+	defer k.mu.Unlock()
+
+	return k.plugins[id]
+}
+
 func (k *Kernel) Register(p Plugin) error {
 	k.mu.Lock()
 	defer k.mu.Unlock()
