@@ -6,10 +6,12 @@ package plugins
 
 import (
 	"lapis-project/pkg/kernel"
-	"lapis-project/pkg/layout"
 	l "lapis-project/pkg/layout"
 
+	"gioui.org/layout"
+	"gioui.org/widget"
 	"gioui.org/widget/material"
+	"golang.org/x/exp/shiny/materialdesign/icons"
 )
 
 type SidebarPlugin struct {
@@ -34,8 +36,23 @@ func (p *SidebarPlugin) Dependencies() []string {
 
 func (p *SidebarPlugin) Initialize(api kernel.API) error {
 	if p.sidebar == nil {
-		p.sidebar = layout.NewSideBar(p.theme)
+		p.sidebar = l.NewSideBar(p.theme)
 	}
+
+	// Create a test icon
+	testIcon, err := widget.NewIcon(icons.NavigationMenu)
+	if err != nil {
+		return err
+	}
+
+	p.sidebar.AddView(l.SidebarView{
+		ID:    "test-view",
+		Icon:  testIcon,
+		Title: "Test View",
+		Content: func(gtx layout.Context) layout.Dimensions {
+			return material.Body1(p.theme, "Test Content").Layout(gtx)
+		},
+	})
 
 	return api.AddUIPlug("core.sidebar", kernel.UIPlug{
 		UI:          p.sidebar.Layout,

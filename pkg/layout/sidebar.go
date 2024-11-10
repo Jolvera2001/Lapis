@@ -23,7 +23,7 @@ type SideBarState struct {
 
 func NewSideBarState() *SideBarState {
 	return &SideBarState{
-		isExpanded:       true,
+		isExpanded:       false,
 		expandedWidth:    300,
 		activityBarWidth: 96,
 		viewButtons:      make(map[string]*widget.Clickable),
@@ -87,7 +87,7 @@ func (s *Sidebar) layoutActivityBar(gtx layout.Context) layout.Dimensions {
             gtx.Constraints.Max.X = int(s.state.activityBarWidth)
 
 			// Paint the background for activity bar
-            background := color.NRGBA{R: 0x1E, G: 0x1E, B: 0x2E, A: 0xFF} // Dark blue-ish background
+            background := color.NRGBA{R: 0xF0, G: 0xF0, B: 0xF0, A: 0xFF} // light gray
             paint.FillShape(gtx.Ops,
                 background,
                 clip.Rect{
@@ -107,12 +107,25 @@ func (s *Sidebar) layoutActivityBar(gtx layout.Context) layout.Dimensions {
 
                     for _, view := range s.views {
                         view := view
+						if s.state.viewButtons[view.ID] == nil {
+							s.state.viewButtons[view.ID] = &widget.Clickable{}
+						}
                         btn := s.state.viewButtons[view.ID]
 
                         children = append(children,
                             layout.Rigid(func(gtx layout.Context) layout.Dimensions {
                                 // check if this view is active
                                 isActive := s.state.activeView == view.ID
+
+								// Check for clicks after the button layout
+								if btn.Clicked(gtx) {
+									if s.state.activeView == view.ID {
+										s.state.isExpanded = !s.state.isExpanded
+									} else {
+										s.state.activeView = view.ID
+										s.state.isExpanded = true
+									}
+								}
 
 								if isActive {
 									background := color.NRGBA{R: 0x33, G: 0x33, B: 0xEE, A: 0xFF} // Blue color
@@ -127,29 +140,21 @@ func (s *Sidebar) layoutActivityBar(gtx layout.Context) layout.Dimensions {
 									)
 								}
 
-                                // style btn based on state
-                                return material.Clickable(gtx, btn, func(gtx layout.Context) layout.Dimensions {
-                                    // icon button
-                                    size := gtx.Dp(32)
-                                    gtx.Constraints.Min = image.Point{X: size, Y: size}
-                                    gtx.Constraints.Max = image.Point{X: size, Y: size}
-
-                                    if btn.Clicked(gtx) {
-                                        if s.state.activeView == view.ID {
-                                            // toggle if clicking active view
-                                            s.state.isExpanded = !s.state.isExpanded
-                                        } else {
-                                            // switch to new view
-                                            s.state.activeView = view.ID
-                                            s.state.isExpanded = true
-                                        }
-                                    }
-
-                                    // draw icon
-                                    return view.Icon.Layout(gtx, s.theme.Fg)
-                                })
+                                return btn.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
+									// icon button
+									size := gtx.Dp(32)
+									gtx.Constraints.Min = image.Point{X: size, Y: size}
+									gtx.Constraints.Max = image.Point{X: size, Y: size}
+						
+									// draw icon with white color for better visibility
+									iconColor := color.NRGBA{R: 0x00, G: 0x00, B: 0x00, A: 0xFF}
+									if isActive {
+										iconColor = color.NRGBA{R: 0xFF, G: 0xFF, B: 0xFF, A: 0xFF}
+									}
+									return view.Icon.Layout(gtx, iconColor)
+								})
                             }),
-                            layout.Rigid(layout.Spacer{Height: unit.Dp(8)}.Layout), // Fixed Rigid spelling
+                            layout.Rigid(layout.Spacer{Height: unit.Dp(8)}.Layout),
                         )
                     }
 
@@ -162,8 +167,20 @@ func (s *Sidebar) layoutActivityBar(gtx layout.Context) layout.Dimensions {
 
 func (s *Sidebar) layoutSidebarPanel(gtx layout.Context) layout.Dimensions {
 	// set width for expanded sidebar
-	gtx.Constraints.Min.X = int(s.state.expandedWidth)
-	gtx.Constraints.Max.X = int(s.state.expandedWidth)
+    gtx.Constraints.Min.X = int(s.state.expandedWidth)
+    gtx.Constraints.Max.X = int(s.state.expandedWidth)
+
+    // Paint the background for sidebar panel - slightly darker gray
+    background := color.NRGBA{R: 0xE8, G: 0xE8, B: 0xE8, A: 0xFF} // Slightly darker gray
+    paint.FillShape(gtx.Ops,
+        background,
+        clip.Rect{
+            Max: image.Point{
+                X: gtx.Constraints.Max.X,
+                Y: gtx.Constraints.Max.Y,
+            },
+        }.Op(),
+    )
 
 	return layout.UniformInset(unit.Dp(8)).Layout(gtx, 
 		func(gtx layout.Context) layout.Dimensions {
