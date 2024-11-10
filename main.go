@@ -7,27 +7,27 @@ import (
 
 	"gioui.org/app"
 	"gioui.org/op"
-	"gioui.org/widget/material"
 
 	"lapis-project/pkg/kernel"
 	"lapis-project/pkg/plugins"
+	"lapis-project/pkg/theme"
 )
 
 func main() {
 	// big bosses
 	k := kernel.NewKernel()
 	layoutManager := kernel.NewLayoutManager()
-	th := material.NewTheme()
+	th, nil := theme.NewCustomTheme()
 
 	// main ui
-	sidebarPlugin := plugins.NewSidebarPlugin(th)
+	sidebarPlugin := plugins.NewSidebarPlugin(th.Theme)
 	if err := k.Register(sidebarPlugin); err != nil {
 		log.Printf("Failed to register sidebar plugin: %v", err)
 		os.Exit(1)
 	}
 
 	// real plugins
-	explorerPlugin := plugins.NewFileExplorerPlugin(th)
+	explorerPlugin := plugins.NewFileExplorerPlugin(th.Theme)
 	if err := k.Register(explorerPlugin); err != nil {
 		log.Printf("Failed to register plugin: %v", err)
 		os.Exit(1)
