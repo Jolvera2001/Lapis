@@ -49,6 +49,8 @@ func main() {
 	//  making sure when the window is taken off, the kernel shuts down
 	defer k.Shutdown()
 
+	k.ConnectLayoutManager(layoutManager)
+
 	// Create window
 	window := new(app.Window)
 

@@ -22,6 +22,18 @@ func NewKernel() *Kernel {
 	}
 }
 
+func (k *Kernel) ConnectLayoutManager(lm *LayoutManager) {
+    k.mu.Lock()
+    defer k.mu.Unlock()
+    
+    // Transfer UI plugs to layout manager
+    for _, plugs := range k.uiPlugs {
+        for _, plug := range plugs {
+            lm.AddWidget(plug)
+        }
+    }
+}
+
 func (k *Kernel) Emit(event Event) error {
 	k.mu.Lock()
 	handlers := k.handlers[event.Name]
