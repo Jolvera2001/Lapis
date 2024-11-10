@@ -25,7 +25,7 @@ func NewSideBarState() *SideBarState {
 	return &SideBarState{
 		isExpanded:       false,
 		expandedWidth:    300,
-		activityBarWidth: 96,
+		activityBarWidth: 48,
 		viewButtons:      make(map[string]*widget.Clickable),
 		expandAnim:       1.0, // Start expanded
 	}
