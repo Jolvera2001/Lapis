@@ -43,7 +43,6 @@ type Sidebar struct {
 	state     *SideBarState
 	views     []SidebarView
 	theme     *material.Theme
-	toggleBtn widget.Clickable
 }
 
 func NewSideBar(theme *material.Theme) *Sidebar {
