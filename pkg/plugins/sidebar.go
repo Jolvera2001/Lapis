@@ -6,6 +6,7 @@ package plugins
 
 import (
 	"lapis-project/pkg/kernel"
+	"lapis-project/pkg/layout"
 	l "lapis-project/pkg/layout"
 
 	"gioui.org/widget/material"
@@ -32,7 +33,11 @@ func (p *SidebarPlugin) Dependencies() []string {
 }
 
 func (p *SidebarPlugin) Initialize(api kernel.API) error {
-	return api.AddUIPlug(p.ID(), kernel.UIPlug{
+	if p.sidebar == nil {
+		p.sidebar = layout.NewSideBar(p.theme)
+	}
+
+	return api.AddUIPlug("core.sidebar", kernel.UIPlug{
 		UI:          p.sidebar.Layout,
 		Destination: "sidebar",
 	})

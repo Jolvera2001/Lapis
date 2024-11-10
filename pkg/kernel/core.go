@@ -16,6 +16,7 @@ type Kernel struct {
 
 func NewKernel() *Kernel {
 	return &Kernel{
+		uiPlugs: make(map[string][]UIPlug),
 		handlers: make(map[string][]EventHandler),
 		plugins:  make(map[string]Plugin),
 	}
@@ -54,7 +55,6 @@ func (k *Kernel) AddUIPlug(pluginId string, uiPlug UIPlug) error {
 	}
 
 	k.uiPlugs[pluginId] = append(k.uiPlugs[pluginId], uiPlug)
-
 	return nil
 }
 
@@ -84,8 +84,6 @@ func (k *Kernel) Register(p Plugin) error {
 
 func (k *Kernel) Initialize() error {
 	k.mu.Lock()
-	defer k.mu.Unlock()
-
 	if k.started {
 		return errors.New("kernel already started")
 	}
@@ -96,6 +94,8 @@ func (k *Kernel) Initialize() error {
 		return fmt.Errorf("error with sorting dependencies: %s", err)
 	}
 
+	k.mu.Unlock()
+
 	// init plugins
 	for id, p := range sorted {
 		if err := p.Initialize(k); err != nil {
@@ -103,6 +103,7 @@ func (k *Kernel) Initialize() error {
 		}
 	}
 
+	k.mu.Lock()
 	// start plugins
 	for id, p := range k.plugins {
 		if err := p.Start(); err != nil {
@@ -111,6 +112,7 @@ func (k *Kernel) Initialize() error {
 	}
 
 	k.started = true
+	k.mu.Unlock()
 	return nil
 }
 

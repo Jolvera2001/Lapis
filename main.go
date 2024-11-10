@@ -10,7 +10,7 @@ import (
 	"gioui.org/widget/material"
 
 	"lapis-project/pkg/kernel"
-	l "lapis-project/pkg/layout"
+	"lapis-project/pkg/plugins"
 )
 
 func main() {
@@ -20,15 +20,24 @@ func main() {
 	th := material.NewTheme()
 
 	// main ui
-	sidebar := l.NewSideBar(th)
+	sidebarPlugin := plugins.NewSidebarPlugin(th)
+	if err := k.Register(sidebarPlugin); err != nil {
+		log.Printf("Failed to register sidebar plugin: %v", err)
+		os.Exit(1)
+	}
 
-	// adding sidebar
-	err := layoutManager.AddWidget(kernel.UIPlug{
-		UI:          sidebar.Layout,
-		Destination: "sidebar",
-	})
-	if err != nil {
-		log.Printf("Failed to add sidebar widget: %v", err)
+	// real plugins
+	explorerPlugin := plugins.NewFileExplorerPlugin(th)
+	if err := k.Register(explorerPlugin); err != nil {
+		log.Printf("Failed to register plugin: %v", err)
+		os.Exit(1)
+	}
+
+	if err := k.AddUIPlug("core.layout", kernel.UIPlug{
+		UI: layoutManager.Layout,
+		Destination: "root",
+	}); err != nil {
+		log.Printf("Failed to add layout manager: %v", err)
 		os.Exit(1)
 	}
 

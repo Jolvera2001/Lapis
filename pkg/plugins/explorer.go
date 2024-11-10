@@ -31,7 +31,9 @@ func (p *FileExplorerPlugin) ID() string {
 }
 
 func (p *FileExplorerPlugin) Dependencies() []string {
-	return nil
+	return []string{
+		"core.sidebar",
+	}
 }
 
 func (p *FileExplorerPlugin) Initialize(api kernel.API) error {
