@@ -6,7 +6,6 @@ import (
 	"os"
 
 	"gioui.org/app"
-	"gioui.org/layout"
 	"gioui.org/op"
 	"gioui.org/widget/material"
 
@@ -15,8 +14,25 @@ import (
 )
 
 func main() {
+	// big bosses
 	k := kernel.NewKernel()
+	layoutManager := kernel.NewLayoutManager()
+	th := material.NewTheme()
 
+	// main ui
+	sidebar := l.NewSideBar(th)
+
+	// adding sidebar
+	err := layoutManager.AddWidget(kernel.UIPlug{
+		UI:          sidebar.Layout,
+		Destination: "sidebar",
+	})
+	if err != nil {
+		log.Printf("Failed to add sidebar widget: %v", err)
+		os.Exit(1)
+	}
+
+	// initializing kernel
 	if err := k.Initialize(); err != nil {
 		fmt.Println("error initializing kernel")
 		os.Exit(0)
@@ -24,42 +40,26 @@ func main() {
 	//  making sure when the window is taken off, the kernel shuts down
 	defer k.Shutdown()
 
-	w := new(app.Window)
+	// Create window
+	window := new(app.Window)
+
+	// Start UI event loop
 	go func() {
-		th := material.NewTheme()
-
-		sidebar := l.NewSideBar(th)
-
-		// layoutManager := kernel.NewLayoutManager()
-
 		var ops op.Ops
 
 		for {
-			e := w.Event()
+			e := window.Event()
 			switch e := e.(type) {
 			case app.DestroyEvent:
 				if e.Err != nil {
 					log.Fatal(e.Err)
 				}
-				return
+				os.Exit(0)
 			case app.FrameEvent:
 				gtx := app.NewContext(&ops, e)
 
-				// layout application
-				layout.Flex{
-					Axis: layout.Horizontal,
-				}.Layout(gtx,
-					layout.Rigid(func(gtx layout.Context) layout.Dimensions {
-						return sidebar.Layout(gtx)
-					}),
-					layout.Flexed(1, func(gtx layout.Context) layout.Dimensions {
-						// Main content area
-						return layout.Center.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
-							label := material.Body1(th, "Main Content Area")
-							return label.Layout(gtx)
-						})
-					}),
-				)
+				// Use layout manager to handle all layout
+				layoutManager.Layout(gtx)
 
 				e.Frame(gtx.Ops)
 			}
