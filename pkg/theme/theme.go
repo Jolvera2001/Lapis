@@ -11,11 +11,11 @@ import (
 	"gioui.org/widget/material"
 )
 
-//go:embed fonts/Nunito-VariableFont_wght.ttf
-var nunitoVariable []byte
+//go:embed fonts/Inter-VariableFont_opsz,wght.ttf
+var InterRegular []byte
 
-//go:embed fonts/Nunito-Italic-VariableFont_wght.ttf
-var nunitoVariableItalic []byte
+//go:embed fonts/Inter-Italic-VariableFont_opsz,wght.ttf
+var InterItalic []byte
 
 type CustomTheme struct {
 	*material.Theme
@@ -29,13 +29,13 @@ type CustomTheme struct {
 
 func NewCustomTheme() (*CustomTheme, error) {
 	// Parse regular variable font
-	regularFace, err := opentype.Parse(nunitoVariable)
+	regularFace, err := opentype.Parse(InterRegular)
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse Nunito regular: %v", err)
 	}
 
 	// Parse italic variable font
-	italicFace, err := opentype.Parse(nunitoVariableItalic)
+	italicFace, err := opentype.Parse(InterItalic)
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse Nunito italic: %v", err)
 	}
