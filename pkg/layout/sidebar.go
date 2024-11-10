@@ -77,10 +77,27 @@ func (s *Sidebar) Layout(gtx layout.Context) layout.Dimensions {
 }
 
 func (s *Sidebar) layoutActivityBar(gtx layout.Context) layout.Dimensions {
+	// Set the width constraint first
+    width := int(s.state.activityBarWidth)
+    gtx.Constraints.Min.X = width
+    gtx.Constraints.Max.X = width
+
     return layout.UniformInset(unit.Dp(4)).Layout(gtx,
         func(gtx layout.Context) layout.Dimensions {
             gtx.Constraints.Min.X = int(s.state.activityBarWidth)
             gtx.Constraints.Max.X = int(s.state.activityBarWidth)
+
+			// Paint the background for activity bar
+            background := color.NRGBA{R: 0x1E, G: 0x1E, B: 0x2E, A: 0xFF} // Dark blue-ish background
+            paint.FillShape(gtx.Ops,
+                background,
+                clip.Rect{
+                    Max: image.Point{
+                        X: width,
+                        Y: gtx.Constraints.Max.Y,
+                    },
+                }.Op(),
+            )
 
             // vertical list of icons
             return layout.Flex{
