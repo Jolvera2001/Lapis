@@ -113,6 +113,20 @@ Because layout.Widget is a function, we can just store the functions within the 
 - Where is should be (sidebar, main area, toolbar, etc.)
   - The Kernel can just determine where this needs to go based off of destination
 
+UI flow now works as follows:
+
+```mermaid
+sequenceDiagram
+  participant a as Plugin
+  participant k as Kernel
+  participant l as LayoutManager
+  participant s as Screen
+
+  a ->> k: AddUIPlug()
+  k ->> l: ConnectLayoutManager()
+  l ->> s: Layout()
+```
+
 ### Event System
 
 Events will be incredibly important since plugins will depend on other events for invoking some sort of internal method in the plugins. A concept could look like
