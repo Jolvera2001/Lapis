@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@codemirror/lang-markdown": "^6.3.1",
+    "@uiw/codemirror-extensions-basic-setup": "^4.23.6",
     "@uiw/codemirror-extensions-hyper-link": "^4.23.6",
     "@uiw/codemirror-extensions-langs": "^4.23.6",
     "@uiw/codemirror-themes-all": "^4.23.6",
