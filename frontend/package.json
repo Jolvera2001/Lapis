@@ -10,6 +10,11 @@
   },
   "dependencies": {
     "@codemirror/lang-markdown": "^6.3.1",
+    "@emotion/react": "^11.13.5",
+    "@emotion/styled": "^11.13.5",
+    "@mui/joy": "^5.0.0-beta.48",
+    "@mui/material": "^6.1.8",
+    "@mui/x-tree-view": "^7.22.1",
     "@uiw/codemirror-extensions-basic-setup": "^4.23.6",
     "@uiw/codemirror-extensions-hyper-link": "^4.23.6",
     "@uiw/codemirror-extensions-langs": "^4.23.6",

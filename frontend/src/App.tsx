@@ -1,10 +1,10 @@
-import MarkdownEditor from "./components/editor";
+import EditorPage from "./features/editor/page/editorPage";
 
 
 function App() {
     return(
         <>
-            <MarkdownEditor />
+            <EditorPage />
         </>
     )
 }

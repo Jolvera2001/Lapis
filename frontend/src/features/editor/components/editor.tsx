@@ -7,13 +7,15 @@ import { Extension } from "@uiw/react-codemirror";
 interface EditorProps {
     initialValue?: string;
     height?: string;
+    width?: string;
     className?: string;
     onContentChange?: (content: string) => void;
 }
 
 function MarkdownEditor({
     initialValue = "# Hello World!",
-    height = "300px",
+    height = "",
+    width = "",
     className = "",
     onContentChange,
 }: EditorProps) {
@@ -36,10 +38,15 @@ function MarkdownEditor({
         <ReactCodeMirror
             value={content}
             height={height}
+            width={width}
             className={className}
             extensions={extensions}
             onChange={handleChange}
             theme="light"
+            style={{
+                 height: '100%', 
+                 width: '100%',
+                }}
             indentWithTab={true}
             basicSetup={{
                 lineNumbers: true,
