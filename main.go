@@ -1,81 +1,36 @@
 package main
 
 import (
-	"fmt"
-	"log"
-	"os"
+	"embed"
 
-	"gioui.org/app"
-	"gioui.org/op"
-
-	"lapis-project/pkg/kernel"
-	"lapis-project/pkg/plugins"
-	"lapis-project/pkg/theme"
+	"github.com/wailsapp/wails/v2"
+	"github.com/wailsapp/wails/v2/pkg/options"
+	"github.com/wailsapp/wails/v2/pkg/options/assetserver"
 )
 
+//go:embed all:frontend/dist
+var assets embed.FS
+
 func main() {
-	// big bosses
-	k := kernel.NewKernel()
-	layoutManager := kernel.NewLayoutManager()
-	th, nil := theme.NewCustomTheme()
+	// Create an instance of the app structure
+	app := NewApp()
 
-	// main ui
-	sidebarPlugin := plugins.NewSidebarPlugin(th.Theme)
-	if err := k.Register(sidebarPlugin); err != nil {
-		log.Printf("Failed to register sidebar plugin: %v", err)
-		os.Exit(1)
+	// Create application with options
+	err := wails.Run(&options.App{
+		Title:  "Lapis",
+		Width:  800,
+		Height: 600,
+		AssetServer: &assetserver.Options{
+			Assets: assets,
+		},
+		BackgroundColour: &options.RGBA{R: 27, G: 38, B: 54, A: 1},
+		OnStartup:        app.startup,
+		Bind: []interface{}{
+			app,
+		},
+	})
+
+	if err != nil {
+		println("Error:", err.Error())
 	}
-
-	// real plugins
-	explorerPlugin := plugins.NewFileExplorerPlugin(th.Theme)
-	if err := k.Register(explorerPlugin); err != nil {
-		log.Printf("Failed to register plugin: %v", err)
-		os.Exit(1)
-	}
-
-	if err := k.AddUIPlug("core.layout", kernel.UIPlug{
-		UI: layoutManager.Layout,
-		Destination: "root",
-	}); err != nil {
-		log.Printf("Failed to add layout manager: %v", err)
-		os.Exit(1)
-	}
-
-	// initializing kernel
-	if err := k.Initialize(); err != nil {
-		fmt.Println("error initializing kernel")
-		os.Exit(0)
-	}
-	//  making sure when the window is taken off, the kernel shuts down
-	defer k.Shutdown()
-
-	k.ConnectLayoutManager(layoutManager)
-
-	// Create window
-	window := new(app.Window)
-
-	// Start UI event loop
-	go func() {
-		var ops op.Ops
-
-		for {
-			e := window.Event()
-			switch e := e.(type) {
-			case app.DestroyEvent:
-				if e.Err != nil {
-					log.Fatal(e.Err)
-				}
-				os.Exit(0)
-			case app.FrameEvent:
-				gtx := app.NewContext(&ops, e)
-
-				// Use layout manager to handle all layout
-				layoutManager.Layout(gtx)
-
-				e.Frame(gtx.Ops)
-			}
-		}
-	}()
-
-	app.Main()
 }
